@@ -2,11 +2,12 @@ package com.example.hospital.entities;
 
 import lombok.Data;
 
+import java.util.List;
+
 @Data
-public class Patient {
+public class Doctor {
     private int id;
     private String name;
-    private String disease;
-    private int age;
-    private int doctorId;
+    private String speciality;
+    private List<Patient> patients;
 }

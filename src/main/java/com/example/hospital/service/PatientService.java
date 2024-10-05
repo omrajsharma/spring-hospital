@@ -1,42 +1,59 @@
 package com.example.hospital.service;
 
+import com.example.hospital.entities.Doctor;
 import com.example.hospital.entities.Patient;
+import com.example.hospital.repositories.DoctorRepository;
+import com.example.hospital.repositories.PatientRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 @Service
 public class PatientService {
 
-    private HashMap<Integer, Patient> patients = new HashMap<>();
-    private int idCounter = 1;
+    @Autowired
+    private PatientRepository patientRepository;
+
+    @Autowired
+    private DoctorRepository doctorRepository;
 
     public List<Patient> getAllPatients() {
-        return new ArrayList<>(patients.values());
+        return patientRepository.getAllPatients();
     }
 
     public Patient getPatientById(int id) {
-        return patients.get(id);
+        return patientRepository.getPatientById(id);
     }
 
     public Patient addPatient(Patient patient) {
-        patient.setId(idCounter++);
-        patients.put(patient.getId(), patient);
-        return patient;
+        Doctor doctor = doctorRepository.getDoctorById(patient.getDoctorId());
+        if (doctor == null) return null ;
+
+        Patient patientEntity = patientRepository.addPatient(patient);
+
+        if (doctor.getPatients() == null) {
+            doctor.setPatients(new ArrayList<Patient>());
+            doctor.getPatients().add(patientEntity);
+        } else {
+            doctor.getPatients().add(patientEntity);
+        }
+        doctorRepository.updateDoctor(doctor);
+
+        return patientEntity;
     }
 
     public Patient updatePatient(Patient patient) {
         /**
-         * PUT / PATCH
+         * ASSIGNMENT - PUT / PATCH
          */
 
-        return patients.put(patient.getId(), patient);
+        return patientRepository.updatePatient(patient);
     }
 
     public Patient deletePatient(Integer id) {
-        return patients.remove(id);
+        return patientRepository.deletePatient(id);
     }
 
 }
