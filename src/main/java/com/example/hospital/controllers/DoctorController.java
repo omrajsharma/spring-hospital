@@ -1,11 +1,16 @@
 package com.example.hospital.controllers;
 
 import com.example.hospital.entities.Doctor;
+import com.example.hospital.entities.Patient;
 import com.example.hospital.requests.DoctorRequest;
+import com.example.hospital.responses.DoctorResponse;
+import com.example.hospital.responses.PatientResponse;
 import com.example.hospital.service.DoctorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.print.Doc;
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -16,33 +21,56 @@ public class DoctorController {
     private DoctorService doctorService;
 
     @GetMapping("/all")
-    public List<Doctor> getAllDoctors() {
-        return doctorService.getAllDoctors();
+    public List<DoctorResponse> getAllDoctors() {
+        List<Doctor> doctors = doctorService.getAllDoctors();
+        List<DoctorResponse> responses = new ArrayList<>();
+
+        for (Doctor doctor : doctors) {
+            responses.add(convertToResponse(doctor));
+        }
+
+        return responses;
     }
 
+
     @GetMapping("/{id}")
-    public Doctor getDoctorById(@PathVariable int id) {
-        return doctorService.getDoctorById(id);
+    public DoctorResponse getDoctorById(@PathVariable int id) {
+        Doctor doctor = doctorService.getDoctorById(id);
+        return convertToResponse(doctor);
     }
 
     @PostMapping
-    public Doctor addDoctor(@RequestBody DoctorRequest doctorRequest) {
+    public DoctorResponse addDoctor(@RequestBody DoctorRequest doctorRequest) {
         Doctor doctor = new Doctor();
         doctor.setName(doctorRequest.getName());
         doctor.setSpeciality(doctorRequest.getSpeciality());
-        return doctorService.saveDoctor(doctor);
+        Doctor savedDoctor = doctorService.saveDoctor(doctor);
+        return convertToResponse(savedDoctor);
     }
 
-    @PutMapping
-    public Doctor updateDoctor(@RequestBody DoctorRequest doctorRequest) {
+    @PutMapping("/{id}")
+    public DoctorResponse updateDoctor(@PathVariable int id, @RequestBody DoctorRequest doctorRequest) {
         Doctor doctor = new Doctor();
+        doctor.setId(id);
         doctor.setName(doctorRequest.getName());
         doctor.setSpeciality(doctorRequest.getSpeciality());
-        return doctorService.updateDoctor(doctor);
+        Doctor updatedDoctor = doctorService.updateDoctor(doctor);
+        return convertToResponse(updatedDoctor);
     }
 
     @DeleteMapping("/{id}")
     public void deleteDoctor(@PathVariable int id) {
         doctorService.deleteDoctor(id);
+    }
+
+    public DoctorResponse convertToResponse(Doctor doctor){
+        if(doctor == null) {
+            return null;
+        }
+        DoctorResponse response = new DoctorResponse();
+        response.setId(doctor.getId());
+        response.setName(doctor.getName());
+        response.setSpeciality(doctor.getSpeciality());
+        return response;
     }
 }

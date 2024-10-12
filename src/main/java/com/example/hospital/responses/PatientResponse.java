@@ -8,5 +8,6 @@ public class PatientResponse {
     private String name;
     private String disease;
     private int age;
-    private int doctorId;  // Only the doctor ID is exposed
+//    private int doctorId;  // Only the doctor ID is exposed
+    private DoctorResponse doctor;
 }
