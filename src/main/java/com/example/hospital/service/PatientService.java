@@ -16,6 +16,8 @@ public class PatientService {
 
     @Autowired
     private PatientRepository patientRepository;
+    @Autowired
+    private DoctorService doctorService;
 
     @Autowired
     private DoctorRepository doctorRepository;
@@ -42,8 +44,22 @@ public class PatientService {
         return patientRepository.save(patient);
     }
 
-    public Patient updatePatient(Patient patient) {
-        return patientRepository.save(patient);
+    public Patient updatePatient(int id, PatientRequest patientRequest) {
+        Optional<Patient> optionalPatient = patientRepository.findById(id);
+        if(optionalPatient.isPresent()) {
+            Patient patient = optionalPatient.get();
+            patient.setName(patientRequest.getName());
+            patient.setDisease(patientRequest.getDisease());
+            patient.setAge(patientRequest.getAge());
+
+            if (patientRequest.getDoctorId() != 0) {
+                Doctor doctor = doctorService.getDoctorById(patientRequest.getDoctorId());
+                patient.setDoctor(doctor);
+            }
+            return patientRepository.save(patient);
+        } else {
+            throw new RuntimeException("Patient not found with id: " + id);
+        }
     }
 
     public void deletePatient(int id) {
