@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class DoctorService {
@@ -13,23 +14,24 @@ public class DoctorService {
     @Autowired
     private DoctorRepository doctorRepository;
 
-    public List<Doctor> getAllDoctor() {
-        return doctorRepository.getAllDoctor();
+    public List<Doctor> getAllDoctors() {
+        return doctorRepository.findAll();
     }
 
     public Doctor getDoctorById(int id) {
-        return doctorRepository.getDoctorById(id);
+        Optional<Doctor> doctor = doctorRepository.findById(id);
+        return doctor.orElse(null);
     }
 
     public Doctor saveDoctor(Doctor doctor) {
-        return doctorRepository.addDoctor(doctor);
+        return doctorRepository.save(doctor);
     }
 
     public Doctor updateDoctor(Doctor doctor) {
-        return doctorRepository.updateDoctor(doctor);
+        return doctorRepository.save(doctor);  // save() can also update if the entity exists
     }
 
     public void deleteDoctor(int id) {
-        doctorRepository.deleteDoctorById(id);
+        doctorRepository.deleteById(id);
     }
 }

@@ -4,11 +4,12 @@ import com.example.hospital.entities.Doctor;
 import com.example.hospital.entities.Patient;
 import com.example.hospital.repositories.DoctorRepository;
 import com.example.hospital.repositories.PatientRepository;
+import com.example.hospital.requests.PatientRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class PatientService {
@@ -20,40 +21,32 @@ public class PatientService {
     private DoctorRepository doctorRepository;
 
     public List<Patient> getAllPatients() {
-        return patientRepository.getAllPatients();
+        return patientRepository.findAll();
     }
 
     public Patient getPatientById(int id) {
-        return patientRepository.getPatientById(id);
+        Optional<Patient> patient = patientRepository.findById(id);
+        return patient.orElse(null);
     }
 
-    public Patient addPatient(Patient patient) {
-        Doctor doctor = doctorRepository.getDoctorById(patient.getDoctorId());
-        if (doctor == null) return null ;
-
-        Patient patientEntity = patientRepository.addPatient(patient);
-
-        if (doctor.getPatients() == null) {
-            doctor.setPatients(new ArrayList<Patient>());
-            doctor.getPatients().add(patientEntity);
-        } else {
-            doctor.getPatients().add(patientEntity);
+    public Patient addPatient(PatientRequest patientRequest) {
+        Optional<Doctor> doctor = doctorRepository.findById(patientRequest.getDoctorId());
+        if (doctor.isEmpty()) {
+            return null;  // Return null if doctor does not exist
         }
-        doctorRepository.updateDoctor(doctor);
-
-        return patientEntity;
+        Patient patient = new Patient();
+        patient.setName(patientRequest.getName());
+        patient.setDisease(patientRequest.getDisease());
+        patient.setAge(patientRequest.getAge());
+        patient.setDoctor(doctor.get());
+        return patientRepository.save(patient);
     }
 
     public Patient updatePatient(Patient patient) {
-        /**
-         * ASSIGNMENT - PUT / PATCH
-         */
-
-        return patientRepository.updatePatient(patient);
+        return patientRepository.save(patient);
     }
 
-    public Patient deletePatient(Integer id) {
-        return patientRepository.deletePatient(id);
+    public void deletePatient(int id) {
+        patientRepository.deleteById(id);
     }
-
 }
